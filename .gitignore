@@ -1,0 +1,11 @@
+.env
+data/
+__pycache__/
+*.pyc
+frontend/node_modules/
+frontend/dist/
+assets/music/*.mp3
+assets/music/*.wav
+assets/sfx/*.mp3
+assets/sfx/*.wav
+.pytest_cache/

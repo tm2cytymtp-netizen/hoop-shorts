@@ -1,0 +1,15 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+sqlalchemy>=2.0
+psycopg[binary]>=3.2      # only needed for PostgreSQL / Supabase
+pydantic-settings>=2.4
+httpx>=0.27
+pillow>=10.4
+anthropic>=0.60
+kokoro-onnx>=0.4           # free local narration (Apache-2.0 model, CPU is enough)
+soundfile>=0.12
+google-api-python-client>=2.140
+google-auth-oauthlib>=1.2
+cryptography>=43
+python-multipart>=0.0.9
+pytest>=8

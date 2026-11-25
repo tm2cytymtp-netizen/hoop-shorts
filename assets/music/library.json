@@ -1,0 +1,13 @@
+[
+  {
+    "_comment": "EXAMPLE ENTRY — replace with tracks you hold a commercial licence for, then delete this comment line. Only entries with commercial_use=true and a licence are ever used.",
+    "file": "example-epic-theme.mp3",
+    "title": "Example Epic Theme",
+    "artist": "Composer Name",
+    "license": "Epidemic Sound subscription licence (or: YouTube Audio Library — no attribution required)",
+    "license_url": "https://...",
+    "attribution": "",
+    "commercial_use": true,
+    "moods": ["epic", "triumphant"]
+  }
+]

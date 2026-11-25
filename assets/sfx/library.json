@@ -1,0 +1,11 @@
+[
+  {
+    "_comment": "EXAMPLE ENTRY — tags must match the script's sfx tags: battle, crowd, wind, sea, fire, rain, march, bells, horses",
+    "file": "example-wind.wav",
+    "title": "Wind over plains",
+    "artist": "Recordist",
+    "license": "CC0 1.0 (freesound.org/s/xxxxx)",
+    "commercial_use": true,
+    "tags": ["wind"]
+  }
+]

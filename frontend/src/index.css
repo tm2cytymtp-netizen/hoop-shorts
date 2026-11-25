@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Anton", "Impact", sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-gold: #ff8a00;
+  --color-parchment: #f4f4f5;
+}
+
+body { font-family: var(--font-sans); }
+.card { @apply rounded-xl border border-stone-800 bg-stone-900/60 p-4; }
+.btn { @apply inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition disabled:opacity-40; }
+.btn-primary { @apply inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition disabled:opacity-40 bg-gold text-stone-950 hover:bg-amber-300; }
+.btn-ghost { @apply inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition disabled:opacity-40 border border-stone-700 hover:bg-stone-800; }
+.btn-danger { @apply inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition disabled:opacity-40 border border-red-800 text-red-300 hover:bg-red-950; }
+.input { @apply w-full rounded-lg border border-stone-700 bg-stone-950 px-3 py-1.5 text-sm outline-none focus:border-gold; }
+.label { @apply mb-1 block text-xs uppercase tracking-wide text-stone-400; }
+h1.page { @apply mb-6 font-display text-2xl text-parchment; }

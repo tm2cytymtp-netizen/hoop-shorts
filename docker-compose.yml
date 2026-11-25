@@ -1,0 +1,19 @@
+services:
+  api:
+    build: .
+    env_file: .env
+    environment:
+      DATA_DIR: /app/data
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////app/data/app.db}
+    volumes: [ "./data:/app/data", "./assets:/app/assets" ]
+    ports: [ "8000:8000" ]
+    restart: unless-stopped
+  worker:
+    build: .
+    command: python -m app.worker
+    env_file: .env
+    environment:
+      DATA_DIR: /app/data
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////app/data/app.db}
+    volumes: [ "./data:/app/data", "./assets:/app/assets" ]
+    restart: unless-stopped
