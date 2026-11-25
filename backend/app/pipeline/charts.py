@@ -694,7 +694,7 @@ class BrollReader:
         if len(buf) == self.w * self.h * 3:
             img = Image.frombytes("RGB", (self.w, self.h), buf).resize((W, H), Image.BILINEAR)
             dark = Image.new("RGB", (W, H), (8, 10, 18))
-            self.last = Image.blend(img, dark, 0.5)
+            self.last = Image.blend(img, dark, 0.64)
         return self.last.copy()
 
     def close(self) -> None:

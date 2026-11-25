@@ -31,6 +31,7 @@ def setup() -> None:
     WORK.mkdir(parents=True, exist_ok=True)
     os.environ["DATABASE_URL"] = f"sqlite:///{WORK}/s.db"
     os.environ["DATA_DIR"] = str(WORK / "data")
+    os.environ.setdefault("HOOP_PHOTO_CACHE", str(REPO / "assets" / "photos"))   # commit new photos with the video
     models = WORK / "data/models/kokoro"
     models.mkdir(parents=True, exist_ok=True)
     for f in ("kokoro-v1.0.onnx", "voices-v1.0.bin"):
