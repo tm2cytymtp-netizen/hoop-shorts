@@ -33,6 +33,15 @@ The runner downloads the Kokoro voice model from GitHub on first use.
 Pick the most timely topic that fits the format (search today's NBA news). Avoid repeating a player who led
 one of the last 3 videos unless the news demands it.
 
+### Sunday extras (owner request)
+Sunday's "week in numbers" should be the flashiest video of the week: 8–9 scenes, mostly motion charts
+(`hype_text`, `all_time_rank`, `head_to_head`, `season_bars`), a `look` with the week's top team colours.
+Real player **photos**: test `curl -sI https://upload.wikimedia.org` first. If it answers, run the renderer with
+`HOOP_NO_PHOTOS=0` so licensed Wikimedia Commons photos are used (credit them in the description as
+"Photos: Wikimedia Commons (<licence>)"). If it doesn't answer, team badges are used; say nothing about it.
+**No game footage or highlight clips**: NBA broadcast footage is copyrighted and would get Content ID claims
+or strikes on the channel. Never download or include it, even short clips.
+
 ## 3. Research rules (hard)
 * Every number on screen or in narration comes from a source fetched **today**: Basketball-Reference first
   (player pages, league per-game page, leaders pages), Wikipedia/AP/ESPN for news facts. Cross-check
