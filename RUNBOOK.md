@@ -39,14 +39,22 @@ another 50-point game, and keep the video 30–55 s). Then continue at step 5. N
 Pick the most timely topic that fits the format (search today's NBA news). Avoid repeating a player who led
 one of the last 3 videos unless the news demands it.
 
-### Sunday extras (owner request)
-Sunday's "week in numbers" should be the flashiest video of the week: 8–9 scenes, mostly motion charts
-(`hype_text`, `all_time_rank`, `head_to_head`, `season_bars`), a `look` with the week's top team colours.
-Real player **photos**: test `curl -sI https://upload.wikimedia.org` first. If it answers, run the renderer with
-`HOOP_NO_PHOTOS=0` so licensed Wikimedia Commons photos are used (credit them in the description as
-"Photos: Wikimedia Commons (<licence>)"). If it doesn't answer, team badges are used; say nothing about it.
-**No game footage or highlight clips**: NBA broadcast footage is copyrighted and would get Content ID claims
-or strikes on the channel. Never download or include it, even short clips.
+### Photos and clips in every video (owner request, from 2026-11-29)
+Every video uses licensed media when Wikimedia Commons is reachable (the runner checks automatically,
+`HOOP_PHOTOS=auto`; it prints "licensed photos/clips: ON"):
+* Player photos appear automatically on `big_number` (when its source is a player), `all_time_rank` rows,
+  `head_to_head`, `comeback_card`.
+* Every `hype_text` scene gets `chart.players` (2–4 names whose faces pop in) and `chart.broll` (a Commons
+  search like "basketball game", "basketball dunk", "basketball arena crowd"). The clip is blurred background
+  motion only. Never present it as a specific player or game.
+* The runner adds every photo/clip credit to the YouTube description (CC BY / BY-SA licences require it).
+* After rendering, open 2–3 frames with photos and check each face is plausibly the named player. Look up the
+  Commons file title in the run log. If a photo looks wrong (a different person, a logo or a crowd), set
+  `HOOP_PHOTOS=off` for that video rather than risk the wrong face.
+* **No NBA game footage or highlight clips, ever**: broadcast footage is copyrighted (Content ID claims,
+  strikes). The licensed Commons b-roll is the "clips" part.
+
+Sunday is the flashiest video of the week: 7–9 scenes, mostly motion charts, all with photos.
 
 ## 3. Research rules (hard)
 * Every number on screen or in narration comes from a source fetched **today**: Basketball-Reference first

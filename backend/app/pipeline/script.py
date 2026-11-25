@@ -55,6 +55,10 @@ VISUAL = {
             "source_ids": {"type": "array", "items": {"type": "string"}, "description": "line_compare/head_to_head/tally: P# ids"},
             "loss_stat": {"type": "string", "description": "head_to_head: losses key for a W–L record, e.g. 'Finals L'"},
             "note": {"type": "string"},
+            "players": {"type": "array", "items": {"type": "string"},
+                        "description": "hype_text: player names whose licensed photos pop in under the headline"},
+            "broll": {"type": "string", "description": "hype_text: Wikimedia Commons search for licensed basketball "
+                      "b-roll shown blurred behind the text (generic motion only, never a specific player/game)"},
             "tone": {"type": "string", "enum": ["injury", "positive"], "description": "comeback_card tag colour"},
             "before_head": {"type": "string", "description": "comeback_card column header, e.g. 'LAST SEASON'"},
             "after_head": {"type": "string", "description": "comeback_card column header, e.g. 'THIS SEASON'"},

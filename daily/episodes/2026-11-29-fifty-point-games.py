@@ -1,6 +1,6 @@
 """Sunday Nov 29, 2026 — "7 fifty-point games already" (week-in-numbers slot, extra flashy).
 
-PREPARED IN ADVANCE on Wed Nov 25 with data through Nov 24. The Sunday run MUST refresh every number below
+PREPARED IN ADVANCE on Wed Nov 25 (photos + b-roll on) with data through Nov 24. The Sunday run MUST refresh every number below
 (new 50-point games, scoring leaders, best records), update claims/narration/description to match, then render
 and publish. Sources checked Nov 25:
 - 50-point games: Yahoo Sports list (updated Nov 23) cross-checked with NBA.com, SI, Eurohoops, Field Level Media.
@@ -79,7 +79,9 @@ SCRIPT = {
         {"section": "hook", "sfx": "boom",
          "narration": "We're barely a month into the season, and there have already been seven 50-point games.",
          "visual": {"type": "hype_text", "camera": "none", "kicker": "2026–27 · month one",
-                    "text": "7 FIFTY-POINT GAMES ALREADY", "chart": {}},
+                    "text": "7 FIFTY-POINT GAMES ALREADY",
+                    "chart": {"players": ["Luka Dončić", "Victor Wembanyama", "Cade Cunningham", "James Harden"],
+                              "broll": "basketball game"}},
          "claims": [c("Seven 50-point games in 2026-27 so far", "L1")]},
         {"section": "build", "sfx": "whoosh",
          "narration": "Luka has the biggest, 53 in Portland, and he and Wemby have both done it twice.",
@@ -109,12 +111,12 @@ SCRIPT = {
         {"section": "payoff", "sfx": "ding",
          "narration": "And the Spurs and Lakers share the best record in the league at 15 and 3.",
          "visual": {"type": "hype_text", "camera": "none", "kicker": "Best record", "text": "SPURS & LAKERS: 15–3",
-                    "chart": {}},
+                    "chart": {"players": ["Victor Wembanyama", "Luka Dončić"], "broll": "basketball arena crowd"}},
          "claims": [c("Spurs and Lakers both 15-3, best record", "S1")]},
         {"section": "question", "sfx": "pop",
          "narration": "So who drops the next 50? Drop a name.",
          "visual": {"type": "hype_text", "camera": "none", "kicker": "Your call", "text": "WHO DROPS THE NEXT 50?",
-                    "chart": {}},
+                    "chart": {"players": ["Tyler Herro", "James Harden", "Cade Cunningham"], "broll": "basketball dunk"}},
          "claims": []},
     ],
     "engagement_question": "Who drops the next 50?", "trending_sound_fit": False,

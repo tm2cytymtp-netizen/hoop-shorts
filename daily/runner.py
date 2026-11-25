@@ -73,8 +73,12 @@ def render(ep) -> tuple[Path, dict]:
 
     init_db(); sfx.ensure_library(); sfx.ensure_beat()
     llm.structured = editor
-    if os.environ.get("HOOP_NO_PHOTOS", "1") == "1":
-        commons.find_photo = lambda *a, **k: None   # cloud runs can't reach Wikimedia; team badges are used
+    mode = os.environ.get("HOOP_PHOTOS", "auto")       # auto | on | off
+    use_media = mode == "on" or (mode == "auto" and commons.reachable())
+    print("licensed photos/clips:", "ON" if use_media else "OFF (Wikimedia not reachable — team badges)")
+    if not use_media:
+        commons.find_photo = lambda *a, **k: None
+        commons.find_clip = lambda *a, **k: None
     db = SessionLocal()
     fmt = getattr(ep, "FORMAT", "career_stats")
     settings_store.update(db, "voice", {"speed": 1.08, "format_voice": {fmt: "warm_storyteller"}})
@@ -104,8 +108,11 @@ def render(ep) -> tuple[Path, dict]:
           f"{v.duration_s:.1f}s")
     if not rep["passed"]:
         raise SystemExit("QC failed: " + "; ".join(fails))
+    from app.models import Asset
+    credits = [a.source for a in db.query(Asset).filter(Asset.video_id == v.id, Asset.kind.in_(["photo", "clip"]))]
+    print("media used:", len(credits))
     out = sorted((WORK / "data/videos").glob("*/final.mp4"))[-1]
-    return out, {"duration": v.duration_s}
+    return out, {"duration": v.duration_s, "credits": list(dict.fromkeys(credits))}
 
 
 FEED_HEAD = """<?xml version="1.0" encoding="UTF-8"?>
@@ -144,8 +151,12 @@ if __name__ == "__main__":
     ep = load(path)
     mp4, info = render(ep)
     slug = Path(path).stem
+    meta = dict(ep.META)
+    if info["credits"]:   # licences (CC BY / BY-SA) require credit — added to the YouTube description
+        meta["description"] = meta["description"].rstrip() + "\n\nCredits:\n" + "\n".join(f"• {c}" for c in info["credits"])
+    print("description:\n" + meta["description"])
     if "--no-publish" in sys.argv:
         shutil.copy(mp4, REPO / "videos" / f"{slug}.mp4")
         print("rendered (not published):", REPO / "videos" / f"{slug}.mp4")
     else:
-        print("published to feed:", publish(mp4, slug, ep.META))
+        print("published to feed:", publish(mp4, slug, meta))

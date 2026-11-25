@@ -255,25 +255,58 @@ def _src_label(src: dict) -> str:
 
 
 def _player_photos(db, video, bib: dict) -> dict:
-    """Freely licensed headshots (Wikimedia Commons) for every player in the data, when available."""
+    """Freely licensed photos (Wikimedia Commons) for every player the video shows: P# sources, L# leaderboard
+    rows and hype_text `players`. Also fetches licensed b-roll for hype_text `broll` queries. Keys: player name,
+    plus "broll:<query>" for clips. Every file used is recorded as an Asset with its credit."""
     from ..providers import commons
-    out = {}
+    out: dict = {}
     d = video_dir(video.id) / "images"
+    names: list[str] = []
     for sid, src in bib.items():
-        st = src.get("player_stats")
-        if not st:
-            continue
+        if src.get("player_stats"):
+            names.append(src["player_stats"]["player"])
+        for r in src.get("leaders") or []:
+            names.append(r["player"])
+    brolls: list[str] = []
+    for sc in video.scenes:
+        c = (sc.visual or {}).get("chart") or {}
+        for p in c.get("players") or []:
+            names.append(p["name"] if isinstance(p, dict) else p)
+        if c.get("broll"):
+            brolls.append(c["broll"])
+    for i, name in enumerate(dict.fromkeys(names)):
         try:
-            ph = commons.find_photo(st["player"], d / f"player_{sid}.jpg")
+            ph = commons.find_photo(name, d / f"player_{i}.jpg")
         except Exception:
             ph = None
         if ph:
-            out[st["player"]] = ph["path"]
+            out[name] = ph["path"]
             db.add(Asset(video_id=video.id, kind="photo", path=ph["path"], source=ph["credit"],
                          license=f"{ph['license']} (Wikimedia Commons; credited in description)", commercial_use=True,
-                         ai_generated=False, meta={"page": ph["page"]}))
+                         ai_generated=False, meta={"page": ph["page"], "player": name}))
+    for j, q in enumerate(dict.fromkeys(brolls)):
+        try:
+            cl = commons.find_clip(q, d / f"broll_{j}.video")
+        except Exception:
+            cl = None
+        if cl:
+            out[f"broll:{q}"] = cl["path"]
+            db.add(Asset(video_id=video.id, kind="clip", path=cl["path"], source=cl["credit"],
+                         license=f"{cl['license']} (Wikimedia Commons; credited in description)", commercial_use=True,
+                         ai_generated=False, meta={"page": cl["page"], "query": q}))
     db.commit()
     return out
+
+
+def _team_of(bib: dict, name: str) -> str:
+    for src in bib.values():
+        st = src.get("player_stats")
+        if st and st.get("player") == name:
+            return st.get("team") or ""
+        for r in src.get("leaders") or []:
+            if r["player"] == name:
+                return r.get("team", "")
+    return ""
 
 
 def _season_row(st: dict, label: str | None) -> dict | None:
@@ -400,18 +433,29 @@ def _render_chart_inner(sc, bib, dur, out, fps, reveal_state, photos, charts, v,
         if val is None:
             raise ChartDataError(f"Scene {sc.idx}: big_number value not found in data ({c})")
         dec = 3 if val < 1 else (1 if stat.upper() in ("PPG", "RPG", "APG", "SPG", "BPG", "MPG") else 0)
+        who = (src.get("player_stats") or {}).get("player") if src else None
         charts.render_big_number({"title": c.get("title", ""), "value": val, "decimals": dec,
                                   "label": c.get("label") or stat, "context": c.get("context", ""),
-                                  "source": _src_label(src)}, dur, out, fps)
+                                  "source": _src_label(src), "photo": photos.get(who) if who else None,
+                                  "team": (src.get("player_stats") or {}).get("team", "") if src else ""},
+                                 dur, out, fps)
     elif t == "hype_text":
+        faces = []
+        for p in c.get("players") or []:
+            nm = p["name"] if isinstance(p, dict) else p
+            tm = (p.get("team") if isinstance(p, dict) else None) or _team_of(bib, nm)
+            faces.append((nm, tm, photos.get(nm)))
         charts.render_hype_text({"text": v.get("text", ""), "kicker": v.get("kicker", ""),
-                                 "accent": c.get("accent")}, dur, out, fps)
+                                 "accent": c.get("accent"), "faces": faces,
+                                 "broll": photos.get(f"broll:{c['broll']}") if c.get("broll") else None},
+                                dur, out, fps)
     elif t == "all_time_rank":
         src = bib.get(c.get("source_id", ""))
         if not src or not src.get("leaders"):
             raise ChartDataError(f"Scene {sc.idx}: all_time_rank needs a leaderboard source (L#), got {c.get('source_id')}")
         hl = c.get("highlight") or {}
-        rows = [{**r, "highlight": r["player"] == hl.get("player") and r["season"] == hl.get("season")}
+        rows = [{**r, "highlight": r["player"] == hl.get("player") and r["season"] == hl.get("season"),
+                 "photo": photos.get(r["player"])}
                 for r in src["leaders"][: int(c.get("top", 8))]]
         charts.render_all_time_rank({"title": c.get("title", ""), "subtitle": c.get("subtitle", ""),
                                      "note": c.get("note", ""), "decimals": c.get("decimals", 1)}, rows, dur, out, fps)

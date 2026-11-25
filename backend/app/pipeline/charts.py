@@ -180,28 +180,59 @@ def render_line_compare(spec: dict, series: dict[str, list[float | None]], durat
     return out
 
 
+def _photo_disc(photo: str, size: int, ring) -> Image.Image:
+    from PIL import ImageFilter, ImageOps
+    pad = 60
+    out = Image.new("RGBA", (size + 2 * pad, size + 2 * pad), (0, 0, 0, 0))
+    glow = Image.new("RGBA", out.size, (0, 0, 0, 0))
+    ImageDraw.Draw(glow).ellipse([pad - 18, pad - 18, pad + size + 18, pad + size + 18], fill=tuple(ring) + (200,))
+    out = Image.alpha_composite(out, glow.filter(ImageFilter.GaussianBlur(28)))
+    mask = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(mask).ellipse([0, 0, size - 1, size - 1], fill=255)
+    ph = ImageOps.fit(Image.open(photo).convert("RGB"), (size, size), Image.LANCZOS, centering=(0.5, 0.28))
+    out.paste(ph, (pad, pad), mask)
+    ImageDraw.Draw(out).ellipse([pad, pad, pad + size - 1, pad + size - 1], outline=tuple(ring), width=10)
+    return out
+
+
 def render_big_number(spec: dict, duration: float, out: Path, fps: int = 30) -> Path:
-    """One verified number counting up, with a label and context line."""
+    """One verified number counting up, with a label and context line. With spec['photo'] (a licensed
+    player photo) the photo pops in above the number inside a team-colour ring."""
     value = float(spec["value"])
     decimals = int(spec.get("decimals", 1))
     nframes = max(1, int(duration * fps))
     base = _bg()
+    disc = None
+    if spec.get("photo"):
+        disc = _photo_disc(spec["photo"], 400, team_colors(spec.get("team", ""))[1])
     pipe = FramePipe(out, W, H, fps)
     try:
         for fi in range(nframes):
             t = fi / max(1, nframes - 1)
             k = ease(min(1, t / 0.45))
             im = _bgf(base, fi)
+            if disc is not None:
+                kp = ease(min(1, (fi / fps) / 0.35))
+                sz = max(1, int(disc.width * (0.7 + 0.3 * kp)))
+                dd = disc.resize((sz, sz), Image.BILINEAR)
+                dd.putalpha(dd.getchannel("A").point(lambda a: int(a * kp)))
+                im.paste(dd, (int(W / 2 - sz / 2), int(450 - sz / 2)), dd)
             d = ImageDraw.Draw(im)
+            ty, ny, ly, cy = (690, 900, 1090, 1140) if disc is not None else (220, 760, 990, 1060)
             if spec.get("title"):
-                meme_text(d, spec["title"], (50, 220, W - 50, 480), size=90, fill=TEXT)
+                if disc is not None:
+                    d.text((W / 2, ty + 40), spec["title"].upper(), font=font("Anton-Regular.ttf", 76), anchor="mm",
+                           fill=TEXT, stroke_width=3, stroke_fill=(0, 0, 0))
+                else:
+                    meme_text(d, spec["title"], (50, 220, W - 50, 480), size=90, fill=TEXT)
             num = f"{value * k:,.{decimals}f}"
-            d.text((W / 2, 760), num, font=font("Anton-Regular.ttf", 330), anchor="mm", fill=GOLD,
-                   stroke_width=6, stroke_fill=(0, 0, 0))
+            d.text((W / 2, ny), num, font=font("Anton-Regular.ttf", 260 if disc is not None else 330), anchor="mm",
+                   fill=GOLD, stroke_width=6, stroke_fill=(0, 0, 0))
             if spec.get("label"):
-                d.text((W / 2, 990), spec["label"].upper(), font=font("Anton-Regular.ttf", 64), anchor="mm", fill=TEXT)
+                d.text((W / 2, ly), spec["label"].upper(), font=font("Anton-Regular.ttf", 58), anchor="mm", fill=TEXT)
             if spec.get("context") and t > 0.4:
-                meme_text(d, spec["context"], (60, 1060, W - 60, 1240), size=52, fill=MUTED)
+                meme_text(d, spec["context"], (60, cy, W - 60, cy + 130 if disc is not None else 1240), size=48,
+                          fill=MUTED)
             _footer(d, spec.get("source", ""))
             pipe.write(im)
     finally:
@@ -579,7 +610,9 @@ def render_hype_text(spec: dict, duration: float, out: Path, fps: int = 30) -> P
     from .cards import wrap
     nframes = max(1, int(duration * fps))
     base = _bg(seed=11)
+    broll = BrollReader(spec["broll"], fps) if spec.get("broll") else None
     acc = tuple(spec.get("accent") or GOLD)
+    faces = [player_icon(n, tm, 190, ph) for n, tm, ph in (spec.get("faces") or [])[:4]]
     f, lines, size = wrap(spec["text"].upper(), "Anton-Regular.ttf", W - 140, 150, min_size=80, max_lines=4)
     lh = int(size * 1.08)
     y0 = 760 - (len(lines) * lh) / 2
@@ -597,7 +630,7 @@ def render_hype_text(spec: dict, duration: float, out: Path, fps: int = 30) -> P
     try:
         for fi in range(nframes):
             t = fi / fps
-            im = _bgf(base, fi).convert("RGBA")
+            im = (broll.frame() if broll else _bgf(base, fi)).convert("RGBA")
             k = ease(min(1, t / 0.35))
             sc = 1.18 - 0.18 * k
             pulse = 0.75 + 0.25 * math.sin(t * 3.2)
@@ -622,10 +655,53 @@ def render_hype_text(spec: dict, duration: float, out: Path, fps: int = 30) -> P
             bw = (W - 300) * ease(window(t / max(duration, 0.1), 0.08, 0.3))
             by = y0 + len(lines) * lh + 40
             d.rounded_rectangle([W / 2 - bw / 2, by, W / 2 + bw / 2, by + 12], radius=6, fill=acc + (255,))
+            if faces:
+                n = len(faces)
+                gap = 30
+                tot = n * 190 + (n - 1) * gap
+                for i, fc in enumerate(faces):
+                    kf = ease(window(t / max(duration, 0.1), 0.12 + 0.07 * i, 0.3 + 0.07 * i))
+                    if kf <= 0:
+                        continue
+                    x = int(W / 2 - tot / 2 + i * (190 + gap))
+                    y = int(by + 50 + (1 - kf) * 60)
+                    f2 = fc.copy()
+                    f2.putalpha(f2.getchannel("A").point(lambda a: int(a * kf)))
+                    im.paste(f2, (x, y), f2)
             pipe.write(im.convert("RGB"))
     finally:
         pipe.close()
+        if broll:
+            broll.close()
     return out
+
+
+class BrollReader:
+    """Streams a licensed b-roll clip as blurred, darkened 1080x1920 background frames (looped)."""
+
+    def __init__(self, path: str, fps: int = 30):
+        import subprocess
+        self.w, self.h = 540, 960
+        self.proc = subprocess.Popen(
+            ["ffmpeg", "-loglevel", "error", "-stream_loop", "-1", "-i", path, "-an", "-vf",
+             f"fps={fps},scale={self.w}:{self.h}:force_original_aspect_ratio=increase,crop={self.w}:{self.h},"
+             "boxblur=6:2,eq=brightness=-0.22:saturation=0.75", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+            stdout=subprocess.PIPE)
+        self.last = Image.new("RGB", (W, H), BG)
+
+    def frame(self) -> Image.Image:
+        buf = self.proc.stdout.read(self.w * self.h * 3)
+        if len(buf) == self.w * self.h * 3:
+            img = Image.frombytes("RGB", (self.w, self.h), buf).resize((W, H), Image.BILINEAR)
+            dark = Image.new("RGB", (W, H), (8, 10, 18))
+            self.last = Image.blend(img, dark, 0.5)
+        return self.last.copy()
+
+    def close(self) -> None:
+        try:
+            self.proc.kill()
+        except Exception:
+            pass
 
 
 def render_all_time_rank(spec: dict, rows: list[dict], duration: float, out: Path, fps: int = 30) -> Path:
@@ -639,7 +715,7 @@ def render_all_time_rank(spec: dict, rows: list[dict], duration: float, out: Pat
     vmin = spec.get("axis_min", min(r["value"] for r in rows) * 0.8)
     row_h = min(118, int(820 / max(1, n)))
     y_top = 400
-    icons = [player_icon(r["player"], r.get("team", ""), row_h - 26) for r in rows]
+    icons = [player_icon(r["player"], r.get("team", ""), row_h - 26, r.get("photo")) for r in rows]
     x0, x1 = 330, W - 60
     pipe = FramePipe(out, W, H, fps)
     try:
