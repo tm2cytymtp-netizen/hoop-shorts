@@ -19,6 +19,12 @@ The runner downloads the Kokoro voice model from GitHub on first use.
   2026-11-26, 2026-11-27, 2026-11-28.
 * Skip if `feed.xml` already has an item whose guid starts with today's date.
 
+### Prepared episodes
+If `daily/episodes/<today's date>-*.py` already exists, it was prepared in advance with older data (its
+docstring says what to refresh). Use it as the plan, but **re-fetch every number and claim today**: update
+SRC, the narration, claims, `THRU` date and description to match today's sources (add anything new, e.g.
+another 50-point game, and keep the video 30–55 s). Then continue at step 5. Never publish it unrefreshed.
+
 ## 2. Today's format (weekly rhythm)
 | Day | Format | Slot (Central) |
 |---|---|---|

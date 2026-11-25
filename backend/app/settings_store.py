@@ -47,7 +47,8 @@ DEFAULTS: dict = {
     "voice": {
         # respellings checked against Kokoro's phonemizer (Celtics -> "sel-tiks", not "kel-tiks")
         "pronunciations": {"Celtics": "Selltix", "Hayward": "Hayword", "Kobe": "Kobey", "Dončić": "Donchich",
-                           "Doncic": "Donchich", "Jerome": "/dʒəɹˈoʊm/", "Wagner": "Vahgner"},
+                           "Doncic": "Donchich", "Jerome": "/dʒəɹˈoʊm/", "Wagner": "Vahgner",
+                           "Giannis": "Yahnis", "Cunningham": "Cunninghum"},
         "provider": "kokoro",          # kokoro = free, runs on your computer | elevenlabs = paid
         "kokoro_presets": {
             "energetic_commentator": "am_puck", "funny_meme_narrator": "am_eric",
