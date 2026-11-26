@@ -263,7 +263,7 @@ def _player_photos(db, video, bib: dict) -> dict:
     d = video_dir(video.id) / "images"
     names: list[str] = []
     for sid, src in bib.items():
-        if src.get("player_stats"):
+        if src.get("player_stats") and not src.get("no_photo"):   # no_photo: derived/joke figures, not a person
             names.append(src["player_stats"]["player"])
         for r in src.get("leaders") or []:
             names.append(r["player"])

@@ -490,8 +490,8 @@ def render_head_to_head(spec: dict, players: list[dict], duration: float, out: P
     tie = len(win) > 1
     has_l = any(p.get("losses") is not None for p in players)
     top = max((p.get("value") or 0) + (p.get("losses") or 0) for p in players) or 1
-    row_h = 230 if n <= 3 else 190 if n == 4 else 165
-    isz = min(150, row_h - 30)
+    row_h = 330 if n <= 2 else 230 if n == 3 else 190 if n == 4 else 165
+    isz = min(170 if n <= 2 else 150, row_h - 30)
     icons = [player_icon(p["name"], p.get("team", ""), isz, p.get("photo")) for p in players]
     nframes = max(1, int(duration * fps))
     base = _bg()
@@ -508,8 +508,10 @@ def render_head_to_head(spec: dict, players: list[dict], duration: float, out: P
                 k = ease(window(t, 0.04 + 0.08 * i, 0.42 + 0.08 * i))
                 y = y_top + i * row_h
                 im.paste(icons[i], (45, int(y)), icons[i])
-                d.text((x0, y + 18), p["name"].upper(), font=font("Anton-Regular.ttf", 46), anchor="lm", fill=TEXT)
-                bar_y0, bar_y1 = y + 58, y + 132
+                big = n <= 2
+                d.text((x0, y + 18), p["name"].upper(), font=font("Anton-Regular.ttf", 56 if big else 46), anchor="lm",
+                       fill=TEXT)
+                bar_y0, bar_y1 = (y + 70, y + 170) if big else (y + 58, y + 132)
                 d.rounded_rectangle([x0, bar_y0, x1, bar_y1], radius=14, fill=GRID)
                 v = (p.get("value") or 0) * k
                 lead = i in win and t > 0.55
