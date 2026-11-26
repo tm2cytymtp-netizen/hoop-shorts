@@ -614,8 +614,9 @@ def render_hype_text(spec: dict, duration: float, out: Path, fps: int = 30) -> P
     base = _bg(seed=11)
     broll = BrollReader(spec["broll"], fps) if spec.get("broll") else None
     acc = tuple(spec.get("accent") or GOLD)
-    faces = [player_icon(n, tm, 190, ph) for n, tm, ph in (spec.get("faces") or [])[:4]]
     f, lines, size = wrap(spec["text"].upper(), "Anton-Regular.ttf", W - 140, 150, min_size=80, max_lines=4)
+    fsz = 190 if len(lines) <= 2 else 150      # smaller faces under a 3-line headline so captions stay clear
+    faces = [player_icon(n, tm, fsz, ph) for n, tm, ph in (spec.get("faces") or [])[:4]]
     lh = int(size * 1.08)
     y0 = 760 - (len(lines) * lh) / 2
     # pre-render headline + glow once
@@ -660,13 +661,13 @@ def render_hype_text(spec: dict, duration: float, out: Path, fps: int = 30) -> P
             if faces:
                 n = len(faces)
                 gap = 30
-                tot = n * 190 + (n - 1) * gap
+                tot = n * fsz + (n - 1) * gap
                 for i, fc in enumerate(faces):
                     kf = ease(window(t / max(duration, 0.1), 0.12 + 0.07 * i, 0.3 + 0.07 * i))
                     if kf <= 0:
                         continue
-                    x = int(W / 2 - tot / 2 + i * (190 + gap))
-                    y = int(by + 50 + (1 - kf) * 60)
+                    x = int(W / 2 - tot / 2 + i * (fsz + gap))
+                    y = int(max(by + 30, min(by + 50, 1265 - fsz)) + (1 - kf) * 60)
                     f2 = fc.copy()
                     f2.putalpha(f2.getchannel("A").point(lambda a: int(a * kf)))
                     im.paste(f2, (x, y), f2)

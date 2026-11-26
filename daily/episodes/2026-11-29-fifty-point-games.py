@@ -77,9 +77,9 @@ SCRIPT = {
     "style_bible": {"art_direction": "", "characters": [], "locations": []},
     "scenes": [
         {"section": "hook", "sfx": "boom",
-         "narration": "We're barely a month into the season, and there have already been seven 50-point games.",
-         "visual": {"type": "hype_text", "camera": "none", "kicker": "2026–27 · month one",
-                    "text": "7 FIFTY-POINT GAMES ALREADY",
+         "narration": "It's only November, and the NBA already has a 50-point problem. Seven of them, in one month.",
+         "visual": {"type": "hype_text", "camera": "none", "kicker": "It's only November",
+                    "text": "THE NBA HAS A 50-POINT PROBLEM",
                     "chart": {"players": ["Luka Dončić", "Victor Wembanyama", "Cade Cunningham", "James Harden"],
                               "broll": "basketball game"}},
          "claims": [c("Seven 50-point games in 2026-27 so far", "L1")]},

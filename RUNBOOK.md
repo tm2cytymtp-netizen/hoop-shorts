@@ -66,6 +66,16 @@ Sunday is the flashiest video of the week: 7–9 scenes, mostly motion charts, a
   likenesses of real players. Player visuals = team-colour badges (or Wikimedia Commons photos with
   attribution if that domain is reachable). No impersonating real broadcasters.
 
+## 3b. The first 2 seconds (owner rule, every video)
+Viewers decide to swipe in about 2 seconds, so **don't open on a bare number** ("Luka is averaging 36.6...").
+Open with a high-stakes hook or a visual question that makes them need the answer, and keep it true:
+* "Only TWO players in NBA history have scored like this..."
+* "Luka is doing something even Kobe never did."
+* "This hasn't happened since 1974."
+The number comes in the next sentence as the payoff. The scene 1 `hype_text` should be a short question or
+claim (≤6 words), with faces (`players`) and b-roll, so the very first frame already has a face and motion.
+Every hook still has to be backed by a claim in SRC (check "only", "never" and "first" especially hard).
+
 ## 4. Write the episode
 Create `daily/episodes/YYYY-MM-DD-<slug>.py` with the same shape as `daily/episodes/_example_luka.py`:
 `SRC` (every number the video shows), `SCRIPT` (scenes with narration, visual, claims), `META`
